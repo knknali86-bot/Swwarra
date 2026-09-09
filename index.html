@@ -22,13 +22,29 @@
         [data-theme="dark"] {
             --bg:linear-gradient(135deg,#0f172a,#1e293b); --card:#1e293b; --text:#f8fafc;
         }
-        body {background:var(--bg); color:var(--text); min-height:100vh; padding-top:200px; transition:0.3s;}
+        body {background:var(--bg); color:var(--text); min-height:100vh; padding-top:240px; transition:0.3s;}
 
-        nav {position:fixed; top:0; left:0; right:0; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); box-shadow:0 2px 15px rgba(0,0,0,0.08); z-index:999; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;}
-        [data-theme="dark"] nav {background:rgba(30,41,59,0.95);}
-        .logo-container {display:flex; align-items:center; gap:10px;}
-        .logo-img {height:60px; width:auto; border-radius:8px; display:none;}
-        #logoText {font-size:22px; font-weight:900; color:var(--primary);}
+        .banner-container {
+            position:fixed; top:0; left:0; right:0; z-index:1000;
+            background:white; box-shadow:0 2px 15px rgba(0,0,0,0.08);
+        }
+        .banner-img {
+            width:100%; height:180px; object-fit:cover; display:block;
+        }
+        [data-theme="dark"] .banner-container {background:#1e293b;}
+        .logo-text-fallback {
+            text-align:center; padding:20px 15px; font-size:28px; font-weight:900; 
+            color:var(--primary);
+        }
+
+        nav {
+            position:fixed; top:180px; left:0; right:0; background:rgba(255,255,255,0.95);
+            backdrop-filter:blur(10px); z-index:999; padding:12px 20px;
+            display:flex; justify-content:space-between; align-items:center;
+            border-bottom:1px solid #e2e8f0;
+        }
+        [data-theme="dark"] nav {background:rgba(30,41,59,0.95); border-bottom-color:#334155;}
+        
         .nav-buttons {display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
         .btn {padding:10px 14px; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; transition:0.2s;}
         .btn-primary {background:linear-gradient(135deg,var(--primary),var(--p-dark)); color:white;}
@@ -58,26 +74,18 @@
         .badge {padding:3px 8px; border-radius:15px; font-size:10px; font-weight:700; color:white;}
         .badge-featured {background:var(--warn);}
         .badge-new {background:var(--sec);}
-        .product-gallery {position:relative; overflow:hidden;}
         .product-image {width:100%; height:180px; object-fit:cover; background:#e2e8f0;}
-        .gallery-nav {position:absolute; top:50%; transform:translateY(-50%); width:100%; display:flex; justify-content:space-between; padding:0 8px;}
-        .gallery-btn {background:rgba(0,0,0,0.5); color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;}
         .product-info {padding:14px;}
         .product-name {font-size:17px; font-weight:700; margin-bottom:6px;}
         .product-price {font-size:20px; font-weight:900; color:var(--primary); margin-bottom:8px;}
         .product-price span {font-size:13px; color:var(--gray); font-weight:400;}
         .product-desc {color:var(--gray); font-size:14px; margin-bottom:8px;}
         .product-meta {display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; font-size:13px; color:var(--gray);}
-        .product-rating {display:flex; gap:2px; margin-bottom:8px;}
-        .star {color:#ccc; font-size:16px;}
-        .star.filled {color:#f59e0b;}
         .product-seller {display:flex; align-items:center; gap:6px; padding-top:8px; border-top:1px solid #f1f5f9; margin-bottom:10px; font-size:14px;}
         .product-actions {display:flex; gap:6px; flex-wrap:wrap;}
-        .action-btn {flex:1; min-width:75px; padding:8px 6px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:3px;}
+        .action-btn {flex:1; min-width:75px; padding:8px 6px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:3px; text-decoration:none;}
         .btn-call {background:#dbeafe; color:#1d4ed8;}
         .btn-whatsapp {background:#dcfce7; color:#15803d;}
-        .btn-fav {background:#fef3c7; color:#b45309;}
-        .btn-share {background:#e0e7ff; color:#4338ca;}
 
         .admin-panel {background:var(--card); border-radius:14px; padding:22px; margin-bottom:25px; box-shadow:0 2px 10px rgba(0,0,0,0.05); display:none;}
         .admin-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-bottom:20px;}
@@ -118,25 +126,32 @@
 
         @media (max-width:768px) {
             .products-grid {grid-template-columns:1fr 1fr;}
-            body {padding-top:180px;}
+            body {padding-top:220px;}
+            .banner-img {height:150px;}
+            nav {top:150px;}
         }
         @media (max-width:480px) {
             .products-grid {grid-template-columns:1fr;}
-            body {padding-top:160px;}
+            body {padding-top:200px;}
+            .banner-img {height:120px;}
+            nav {top:120px;}
         }
     </style>
 </head>
 <body>
 
+<div class="banner-container">
+    <img id="siteBanner" src="" alt="شعار المتجر" class="banner-img" style="display:none;">
+    <div id="logoFallback" class="logo-text-fallback">🛒 متجرك — السوق المفتوح</div>
+</div>
+
 <nav>
-    <div class="logo-container">
-        <img id="siteLogo" src="" alt="الشعار" class="logo-img">
-        <span id="logoText">متجرك</span>
-    </div>
+    <div></div>
     <div class="nav-buttons">
         <button class="btn btn-outline btn-sm" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+        <button class="btn btn-outline btn-sm" id="changeBannerBtn" onclick="askBannerPermission()" style="display:none;">📷 تغيير الشعار</button>
         <button class="btn btn-primary" onclick="openModal()">+ أضف منتج</button>
-        <div class="notification-bell" id="notifBell">
+        <div class="notification-bell">
             <button class="btn btn-outline btn-sm" onclick="toggleNotif()">
                 <i class="fas fa-bell"></i>
                 <span class="notif-badge" id="notifCount" style="display:none;">0</span>
@@ -151,6 +166,8 @@
 </nav>
 
 <div class="search-container">
+    <input type="file" id="bannerUpload" accept="image/*" style="display:none;" onchange="uploadBanner(event)">
+    
     <input type="text" class="search-input" placeholder="🔍 ابحث بالاسم — الوصف — البائع..." id="searchInput" oninput="renderProducts()">
     <div class="filters-row">
         <div class="price-range">
@@ -158,11 +175,8 @@
             <span>—</span>
             <input type="number" id="maxPrice" placeholder="إلى" oninput="renderProducts()">
         </div>
-        <button class="btn btn-outline btn-sm" id="filterFeaturedBtn" onclick="toggleFeatured()">
+        <button class="btn btn-outline btn-sm" onclick="toggleFeatured()">
             <i class="fas fa-star"></i> المميزة
-        </button>
-        <button class="btn btn-outline btn-sm" onclick="sortByNewest()">
-            <i class="fas fa-clock"></i> الأحدث
         </button>
     </div>
     <div class="categories">
@@ -271,7 +285,7 @@
 <div class="toast" id="toast"></div>
 
 <footer>
-    <h3 id="footerName">🛒 متجرك — السوق المفتوح المجاني</h3>
+    <h3>🛒 متجرك — السوق المفتوح المجاني</h3>
     <p>النشر مجاني للجميع — بموافقة المدير فقط</p>
     <div class="footer-links">
         <a href="#"><i class="fab fa-facebook"></i></a>
@@ -283,19 +297,19 @@
 
 <script>
 const ADMIN_PASSWORD = "20012001";
+let isAdmin = false;
 let products = JSON.parse(localStorage.getItem('marketProducts') || '[]');
 let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
 let currentCategory = 'all';
 let currentTab = 'pending';
 let showFeaturedOnly = false;
-let sortMode = 'newest';
-window.galleryIndex = {};
 
 document.addEventListener('DOMContentLoaded', () => {
-    const savedName = localStorage.getItem('siteName');
-    if (savedName) {
-        document.getElementById('logoText').textContent = savedName;
-        document.getElementById('footerName').textContent = '🛒 ' + savedName + ' — السوق المفتوح المجاني';
+    const savedBanner = localStorage.getItem('siteBanner');
+    if (savedBanner) {
+        document.getElementById('siteBanner').src = savedBanner;
+        document.getElementById('siteBanner').style.display = 'block';
+        document.getElementById('logoFallback').style.display = 'none';
     }
     if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
     
@@ -303,6 +317,31 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminPanel();
     updateNotifBadge();
 });
+
+// 🔒 طلب كلمة المرور لتغيير الشعار
+function askBannerPermission() {
+    const pass = prompt('🔑 كلمة مرور تغيير الشعار:');
+    if (pass === ADMIN_PASSWORD) {
+        document.getElementById('bannerUpload').click();
+    } else {
+        alert('❌ كلمة المرور غير صحيحة!');
+    }
+}
+
+function uploadBanner(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+        const data = ev.target.result;
+        localStorage.setItem('siteBanner', data);
+        document.getElementById('siteBanner').src = data;
+        document.getElementById('siteBanner').style.display = 'block';
+        document.getElementById('logoFallback').style.display = 'none';
+        showToast('✅ تم تغيير الشعار!');
+    };
+    r.readAsDataURL(f);
+}
 
 function showToast(msg) {
     const t = document.getElementById('toast');
@@ -360,8 +399,6 @@ function toggleFeatured() {
     renderProducts();
 }
 
-function sortByNewest() { sortMode = 'newest'; renderProducts(); }
-
 function openModal() {
     document.getElementById('addProductModal').style.display = 'flex';
     document.getElementById('productForm').reset();
@@ -414,6 +451,8 @@ document.getElementById('productForm').addEventListener('submit', e => {
 function openAdminPanel() {
     const pass = prompt('🔑 كلمة مرور المدير:');
     if (pass !== ADMIN_PASSWORD) return alert('❌ خطأ');
+    isAdmin = true;
+    document.getElementById('changeBannerBtn').style.display = 'block'; // يظهر الزر فقط للمدير
     document.getElementById('adminPanel').style.display = 'block';
     renderAdminPanel();
 }
