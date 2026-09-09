@@ -4,46 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجرك — السوق المفتوح</title>
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
     <style>
         * {margin:0; padding:0; box-sizing:border-box; font-family:'Cairo',sans-serif;}
-        :root {--primary:#10b981; --p-dark:#059669; --warn:#f59e0b; --danger:#ef4444; --bg:#f0fdf4; --card:white; --text:#0f172a;}
+        :root {
+            --primary:#10b981; --p-dark:#059669; --sec:#3b82f6; --warn:#f59e0b;
+            --danger:#ef4444; --dark:#0f172a; --gray:#94a3b8; --bg:#f0fdf4; --card:white; --text:#0f172a;
+        }
         body {background:var(--bg); min-height:100vh; padding-top:240px;}
-        
-        .banner-container {position:fixed; top:0; left:0; right:0; z-index:1000; background:white; box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+
+        .banner-container {
+            position:fixed; top:0; left:0; right:0; z-index:1000;
+            background:white; box-shadow:0 2px 15px rgba(0,0,0,0.08);
+        }
         .banner-img {width:100%; height:180px; object-fit:cover; display:block;}
-        
-        nav {position:fixed; top:180px; left:0; right:0; background:rgba(255,255,255,0.95); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0;}
+        .logo-text-fallback {text-align:center; padding:20px; font-size:28px; font-weight:900; color:var(--primary);}
+
+        nav {
+            position:fixed; top:180px; left:0; right:0; background:rgba(255,255,255,0.95);
+            padding:12px 20px; display:flex; justify-content:space-between; align-items:center;
+            border-bottom:1px solid #e2e8f0;
+        }
         .btn {padding:10px 14px; border:none; border-radius:10px; font-weight:700; cursor:pointer;}
         .btn-primary {background:var(--primary); color:white;}
         .btn-outline {border:2px solid var(--primary); color:var(--primary); background:transparent;}
         .btn-sm {padding:6px 10px; font-size:13px;}
-        
+
         .search-container {max-width:1200px; margin:15px auto; padding:0 20px;}
         .search-input {width:100%; padding:14px; border:2px solid #e2e8f0; border-radius:12px; margin-bottom:12px;}
         .categories {display:flex; flex-wrap:wrap; gap:8px; margin-bottom:15px;}
         .category {padding:8px 16px; background:white; border-radius:20px; border:2px solid #e2e8f0; cursor:pointer;}
         .category.active {background:var(--primary); color:white; border-color:var(--primary);}
-        
+
         .container {max-width:1200px; margin:0 auto; padding:0 20px;}
         .products-grid {display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px;}
         .product-card {background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:0.3s; position:relative;}
         .product-card:hover {transform:translateY(-3px);}
-        .product-img {width:100%; height:180px; object-fit:cover; background:#e2e8f0;}
+        .product-card.featured {border:3px solid var(--warn);}
+        .product-badges {position:absolute; top:8px; right:8px; display:flex; flex-direction:column; gap:4px; z-index:10;}
+        .badge {padding:3px 8px; border-radius:15px; font-size:10px; font-weight:700; color:white;}
+        .badge-featured {background:var(--warn);}
+        .badge-new {background:var(--sec);}
+        .product-image {width:100%; height:180px; object-fit:cover; background:#e2e8f0;}
         .product-info {padding:14px;}
         .product-name {font-size:17px; font-weight:700; margin-bottom:6px;}
         .product-price {font-size:20px; font-weight:900; color:var(--primary); margin-bottom:8px;}
-        .product-seller {padding:8px 0; border-top:1px solid #f1f5f9; font-size:14px; color:#64748b;}
-        .product-actions {display:flex; gap:6px; margin-top:10px;}
+        .product-price span {font-size:13px; color:var(--gray); font-weight:400;}
+        .product-desc {color:var(--gray); font-size:14px; margin-bottom:8px;}
+        .product-meta {font-size:13px; color:var(--gray); margin-bottom:8px;}
+        .product-seller {padding-top:8px; border-top:1px solid #f1f5f9; font-size:14px; color:var(--gray); margin-bottom:10px;}
+        .product-actions {display:flex; gap:6px;}
         .action-btn {flex:1; padding:8px; border-radius:8px; text-align:center; text-decoration:none; font-size:13px; font-weight:600;}
         .btn-call {background:#dbeafe; color:#1d4ed8;}
         .btn-whatsapp {background:#dcfce7; color:#15803d;}
-        .del-btn {position:absolute; top:8px; right:8px; background:var(--danger); color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:16px; display:none;}
-        .admin-mode .del-btn {display:flex; align-items:center; justify-content:center;}
-        
+
+        .admin-panel {background:white; border-radius:14px; padding:22px; margin:20px 0; display:none;}
+        .pending-item {background:#fef3c7; border:1px solid #fcd34d; border-radius:10px; padding:14px; margin-bottom:10px;}
+        .pending-actions {display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;}
+        .btn-danger {background:var(--danger); color:white;}
+        .btn-warning {background:var(--warn); color:white;}
+
         .modal {position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:2000; padding:15px;}
         .modal-content {background:white; border-radius:16px; padding:25px; max-width:450px; width:100%; max-height:90vh; overflow-y:auto;}
         .form-group {margin-bottom:14px;}
@@ -52,11 +78,11 @@
         .modal-buttons {display:flex; gap:10px; margin-top:18px;}
         .btn-close {flex:1; padding:12px; background:#e2e8f0; border:none; border-radius:10px; font-weight:700; cursor:pointer;}
         .btn-submit {flex:2; padding:12px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:700; cursor:pointer;}
-        
+
         .toast {position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--primary); color:white; padding:14px 25px; border-radius:10px; font-weight:700; z-index:3000; opacity:0; transition:0.3s;}
         .toast.show {transform:translateX(-50%) translateY(0); opacity:1;}
-        .loading {text-align:center; padding:40px; color:#64748b;}
-        
+        .loading {text-align:center; padding:40px; color:var(--gray);}
+
         @media (max-width:768px) {
             .products-grid {grid-template-columns:1fr 1fr;}
             body {padding-top:220px;}
@@ -79,9 +105,9 @@
 
 <nav>
     <div><strong>🛒 متجرك — السوق المفتوح</strong></div>
-    <div style="display:flex; gap:6px;">
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="openModal()">+ أضف منتج</button>
-        <button class="btn btn-outline btn-sm" id="adminBtn" onclick="openAdminPanel()">⚙️ المدير</button>
+        <button class="btn btn-outline btn-sm" id="adminBtn" onclick="openAdmin()" style="display:none;">⚙️ لوحة المدير</button>
     </div>
 </nav>
 
@@ -95,17 +121,23 @@
     </div>
 </div>
 
-<div class="container" id="mainContainer">
-    <h3 style="margin:10px 0 15px;">🔥 أحدث المنتجات — تُنشر فوراً للكل</h3>
+<div class="container">
+    <!-- لوحة المدير --><div class="admin-panel" id="adminPanel">
+        <h3 style="margin-bottom:15px;">⏳ المنتجات بانتظار الموافقة</h3>
+        <div id="pendingList"></div>
+    </div>
+
+    <h3 style="margin:10px 0 15px;">🔥 أحدث المنتجات</h3>
     <div class="products-grid" id="grid">
         <div class="loading">جاري التحميل...</div>
     </div>
 </div>
 
-<!-- نموذج إضافة منتج -->
+<!-- إضافة منتج -->
 <div class="modal" id="addModal">
     <div class="modal-content">
-        <h3 style="text-align:center; margin-bottom:15px;">➕ إضافة منتج جديد — ينشر فوراً للكل ✅</h3>
+        <h3 style="text-align:center; margin-bottom:15px;">➕ إضافة منتج جديد</h3>
+        <p style="text-align:center; color:var(--warn); margin-bottom:15px; font-weight:600;">⏳ يُنشر بعد موافقة المدير</p>
         <form id="addForm">
             <div class="form-group">
                 <label class="form-label">اسم المنتج *</label>
@@ -145,21 +177,9 @@
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn-close" onclick="closeModal()">إلغاء</button>
-                <button type="submit" class="btn-submit">📤 نشر فوراً للكل</button>
+                <button type="submit" class="btn-submit">📤 إرسال للمراجعة</button>
             </div>
         </form>
-    </div>
-</div>
-
-<!-- لوحة تحكم المدير -->
-<div class="modal" id="adminModal">
-    <div class="modal-content">
-        <h3 style="text-align:center; margin-bottom:20px;">⚙️ لوحة تحكم المدير</h3>
-        <p style="text-align:center; margin-bottom:15px; color:#10b981;">✅ أنت في وضع المدير</p>
-        <p style="font-size:14px; color:#64748b; margin-bottom:20px;">من هنا تقدر تحذف أي منتج وتتحكم بالمحتوى</p>
-        <div class="modal-buttons">
-            <button type="button" class="btn-close" onclick="closeAdminModal()">إغلاق</button>
-        </div>
     </div>
 </div>
 
@@ -173,59 +193,85 @@ const firebaseConfig = {
     projectId: "husaini-store",
     storageBucket: "husaini-store.appspot.com"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const ADMIN_PASS = "20012001";
-let isAdminMode = false;
+let isAdmin = false;
 let currentCat = 'all';
 let allProducts = [];
 
-// تحميل المنتجات من قاعدة البيانات
+// تحميل كل المنتجات من قاعدة البيانات
 async function loadProducts() {
     const snap = await db.collection('products').orderBy('createdAt', 'desc').get();
     allProducts = snap.docs.map(d => ({id:d.id, ...d.data()}));
     renderProducts();
+    renderPending();
 }
 
+// عرض المنتجات المعتمدة للجمهور
 function renderProducts() {
     const g = document.getElementById('grid');
-    let list = allProducts; // الكل يظهر مباشرة بدون موافقة ✅
+    let list = allProducts.filter(p => p.approved === true); // فقط المعتمدة ✅
     
     if (currentCat !== 'all') list = list.filter(p => p.category === currentCat);
     
     const q = document.getElementById('searchInput').value.toLowerCase();
     if (q) list = list.filter(p => 
-        p.name?.toLowerCase().includes(q) || 
-        p.sellerName?.toLowerCase().includes(q)
+        p.name?.toLowerCase().includes(q) || p.sellerName?.toLowerCase().includes(q)
     );
     
     if (!list.length) {
-        g.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:40px;">لا توجد منتجات 🎉 كن أول من يضيف!</p>';
+        g.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--gray);padding:40px;">لا توجد منتجات معروضة بعد 🎉</p>';
         return;
     }
     
-    const containerClass = isAdminMode ? 'admin-mode' : '';
-    document.getElementById('mainContainer').className = containerClass;
-    
-    g.innerHTML = list.map(p => `
-        <div class="product-card">
-            ${isAdminMode ? `<button class="del-btn" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>` : ''}
-            <img src="${p.image || 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=منتج'}" class="product-img" alt="${p.name}">
+    g.innerHTML = list.map(p => {
+        const isNew = (Date.now() - new Date(p.createdAt?.toDate())) < 48*60*60*1000;
+        return `
+        <div class="product-card ${p.featured?'featured':''}">
+            <div class="product-badges">
+                ${p.featured?'<span class="badge badge-featured">⭐ مميز</span>':''}
+                ${isNew?'<span class="badge badge-new">جديد</span>':''}
+            </div>
+            <img src="${p.image || 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=منتج'}" class="product-image" alt="${p.name}">
             <div class="product-info">
-                <h3 class="product-name">${p.name || 'بدون اسم'}</h3>
-                <p class="product-price">${p.price?.toLocaleString() || 0} <span style="font-size:13px;color:#64748b;">ألف دينار</span></p>
-                <p style="color:#64748b;font-size:14px;">${(p.desc||'').substring(0,40)}${p.desc?.length>40?'...':''}</p>
-                <p style="font-size:13px;color:#64748b;margin:5px 0;">📍 ${p.location||''}</p>
-                <div class="product-seller">👤 ${p.sellerName || 'مجهول'}</div>
+                <h3 class="product-name">${p.name}</h3>
+                <p class="product-price">${p.price?.toLocaleString()} <span>ألف دينار</span></p>
+                <p class="product-desc">${(p.desc||'لا وصف').substring(0,50)}${(p.desc||'').length>50?'...':''}</p>
+                <div class="product-meta">📍 ${p.location||''}</div>
+                <div class="product-seller">👤 ${p.sellerName}</div>
                 <div class="product-actions">
                     <a href="tel:${p.phone}" class="action-btn btn-call"><i class="fas fa-phone"></i> اتصال</a>
                     <a href="https://wa.me/${(p.phone||'').replace(/^0/,'964')}" target="_blank" class="action-btn btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب</a>
                 </div>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
+}
+
+// عرض المنتجات بانتظار الموافقة (للمدير فقط)
+function renderPending() {
+    if (!isAdmin) return;
+    const pending = allProducts.filter(p => !p.approved);
+    const container = document.getElementById('pendingList');
+    
+    if (!pending.length) {
+        container.innerHTML = '<p style="color:var(--gray); text-align:center;">لا منتجات بانتظار الموافقة ✅</p>';
+        return;
+    }
+    
+    container.innerHTML = pending.map(p => `
+        <div class="pending-item">
+            <p><strong>${p.name}</strong> — ${p.price} ألف دينار</p>
+            <p>البائع: ${p.sellerName} | ${p.phone}</p>
+            <p style="color:var(--gray); font-size:13px;">📍 ${p.location||'غير محدد'}</p>
+            <div class="pending-actions">
+                <button class="btn btn-primary" onclick="approve('${p.id}')">✅ موافقة ونشر للكل</button>
+                <button class="btn btn-sm btn-danger" onclick="del('${p.id}')">🗑️ حذف</button>
+            </div>
+        </div>`
+    ).join('');
 }
 
 function selectCat(el) {
@@ -243,7 +289,7 @@ function closeModal() {
     document.getElementById('addModal').style.display = 'none';
 }
 
-// إضافة منتج — ينشر فوراً للكل ✅
+// إضافة منتج → بانتظار الموافقة
 document.getElementById('addForm').addEventListener('submit', async e => {
     e.preventDefault();
     
@@ -256,38 +302,42 @@ document.getElementById('addForm').addEventListener('submit', async e => {
         sellerName: document.getElementById('sName').value.trim(),
         phone: document.getElementById('sPhone').value.trim(),
         image: document.getElementById('pImg').value.trim() || '',
-        approved: true, // ✅ الكل يُنشر فوراً بدون موافقة
+        approved: false, // ⏳ بانتظار موافقتك
+        featured: false,
         createdAt: new Date()
     };
     
     await db.collection('products').add(newProduct);
     closeModal();
-    showToast('✅ تم النشر للكل فوراً!');
+    showToast('✅ أُرسل — بانتظار موافقة المدير!');
     loadProducts();
 });
 
-// لوحة المدير
-function openAdminPanel() {
+// فتح لوحة المدير
+function openAdmin() {
     const pass = prompt('🔑 كلمة مرور المدير:');
     if (pass === ADMIN_PASS) {
-        isAdminMode = true;
-        document.getElementById('adminModal').style.display = 'flex';
-        renderProducts();
-        showToast('✅ دخلت وضع المدير — تقدر تحذف أي منتج');
+        isAdmin = true;
+        document.getElementById('adminPanel').style.display = 'block';
+        renderPending();
+        showToast('✅ أهلاً يا مدير!');
     } else {
-        alert('❌ كلمة المرور غير صحيحة!');
+        alert('❌ كلمة المرور غير صحيحة');
     }
 }
 
-function closeAdminModal() {
-    document.getElementById('adminModal').style.display = 'none';
+// موافقة ونشر للكل
+async function approve(id) {
+    await db.collection('products').doc(id).update({ approved: true });
+    showToast('✅ نُشر للكل فوراً!');
+    loadProducts();
 }
 
-// حذف منتج (للمدير فقط)
-async function deleteProduct(id) {
-    if (!confirm('❌ متأكد من حذف هذا المنتج؟')) return;
+// حذف منتج
+async function del(id) {
+    if (!confirm('متأكد من الحذف؟')) return;
     await db.collection('products').doc(id).delete();
-    showToast('✅ تم الحذف!');
+    showToast('🗑️ تم الحذف');
     loadProducts();
 }
 
@@ -300,6 +350,11 @@ function showToast(msg) {
 
 // تشغيل
 loadProducts();
+
+// إظهار زر المدير إذا دخل من الرابط
+if (new URLSearchParams(window.location.search).get('admin') === '20012001') {
+    document.getElementById('adminBtn').style.display = 'block';
+}
 </script>
 </body>
 </html>
